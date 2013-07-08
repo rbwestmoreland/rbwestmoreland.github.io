@@ -1,0 +1,4 @@
+name: Bates Westmoreland
+permalink: /posts/:title
+paginate: 10
+pygments: false
