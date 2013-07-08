@@ -11,7 +11,7 @@ git init
 git add .
 git commit -m updating
 git remote add origin https://github.com/rbwestmoreland/rbwestmoreland.github.io.git
-REM git push origin master --force
+git push origin master --force
 
 REM go back to '_scripts' directory
 cd..
