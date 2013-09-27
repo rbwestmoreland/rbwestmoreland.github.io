@@ -1,5 +1,6 @@
 ---
 layout: default
+title: Design Patterns
 redirects:
  - properly-implementing-the-prototype-pattern
  - properly-implementing-the-template-method-pat
@@ -15,7 +16,7 @@ redirects:
  - the-factory-pattern
  - properly-implementing-idisposable
 ---
-design patterns
+Design Patterns
 ===  
 * [The Prototype Pattern](https://gist.github.com/1686270)  
 * [The Template Method Pattern](https://gist.github.com/1674182)  
