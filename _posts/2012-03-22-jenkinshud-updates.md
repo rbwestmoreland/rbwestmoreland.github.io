@@ -15,4 +15,4 @@ Since introducing [JenkinsHUD](https://github.com/rbwestmoreland/JenkinsHUD), a 
 <!--more-->  
 
 Follow JenkinsHUD on Github: [https://github.com/rbwestmoreland/JenkinsHUD](https://github.com/rbwestmoreland/JenkinsHUD)  
-Use JenkinsHUD: [http://betobates.github.com/JenkinsHUD](http://betobates.github.com/JenkinsHUD)  
+Use JenkinsHUD: [http://rbwestmoreland.github.com/JenkinsHUD](http://rbwestmoreland.github.com/JenkinsHUD)  
