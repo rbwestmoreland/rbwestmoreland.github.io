@@ -1,4 +1,12 @@
 name: Bates Westmoreland
+url: http://www.rbwestmoreland.com
 permalink: /posts/:title
 paginate: 10
-pygments: false
+
+# GitHub Defaults
+lsi: false
+pygments: true
+safe: true
+
+# UTF-8 & parse errors fix
+markdown: redcarpet
