@@ -10,3 +10,11 @@ layout: default
         <p>{{ content }}</p>
     </section>
 </article>
+
+<script type="text/javascript">
+if (mixpanel) {
+  mixpanel.track("post viewed", {
+    "title": {{ page.title | jsonify }}
+  });
+}
+</script>
