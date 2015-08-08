@@ -16,3 +16,9 @@ NuGet Packages
 ===
 * [System.Clock](http://nuget.org/packages/System.Clock) - A testable alternative to DateTime.Now  
 * [Stripe.Webhooks.Module](http://nuget.org/packages/Stripe.Webhooks.Module) - A simple no config http module that listens for stripe.com webhooks and provides a simple subscription model    
+
+<script type="text/javascript">
+if (mixpanel) {
+  mixpanel.track("projects viewed");
+}
+</script>

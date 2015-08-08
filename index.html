@@ -37,3 +37,11 @@ title: Home
 	{% endif %}
 	
 </section>
+
+<script type="text/javascript">
+if (mixpanel) {
+  mixpanel.track("home viewed", {
+    "page": {{ paginator.page | jsonify }}
+  });
+}
+</script>

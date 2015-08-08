@@ -31,3 +31,9 @@ Design Patterns
 * [The Observer Pattern](https://gist.github.com/1470171)  
 * [The Factory Pattern](https://gist.github.com/1461409)  
 * [The Dispose Pattern](https://gist.github.com/1470081)
+
+<script type="text/javascript">
+if (mixpanel) {
+  mixpanel.track("design patterns viewed");
+}
+</script>
