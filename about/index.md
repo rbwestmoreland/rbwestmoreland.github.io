@@ -4,7 +4,7 @@ title: About
 ---
 Bates Westmoreland
 ===  
-I am a software engineer, in Atlanta, Ga, building APIs and hacking on [side projects](/projects). 
+I'm a software architect, in Atlanta, Ga, building APIs and hacking on [side projects](/projects). 
 
 <script type="text/javascript">
 if (mixpanel) {
