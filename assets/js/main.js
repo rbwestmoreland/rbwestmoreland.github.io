@@ -18,6 +18,7 @@ window.app.ensureTimeTagsAreRelative = function() {
 			var ago = moment(timestamp).fromNow();
 			$el.html(ago);
 			$el.attr('title', title);
+			$el.css('cursor', 'help');
 		}
 	});
 };
