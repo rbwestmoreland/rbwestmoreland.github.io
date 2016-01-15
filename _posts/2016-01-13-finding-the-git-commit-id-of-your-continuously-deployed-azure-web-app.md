@@ -20,6 +20,7 @@ Code
 
 The only text inside the `%home%\site\deployments\active` file is the Git commit id. So, all we need to do is read the contents of the file.
 
+    using System;
     using System.IO;
 
     namespace Azure
@@ -27,15 +28,16 @@ The only text inside the `%home%\site\deployments\active` file is the Git commit
         public static class Deployment
         {
             private static string _commitId;
-            private const string Path = @"%home%\site\deployments\active";
 
             public static string GetGitCommitId()
             {
                 if (_commitId != null)
                     return _commitId;
 
-                _commitId = File.Exists(Path)
-                          ? File.ReadAllText(Path)
+                var path = Environment.ExpandEnvironmentVariables(@"%home%\site\deployments\active");
+
+                _commitId = File.Exists(path)
+                          ? File.ReadAllText(path)
                           : string.Empty;
 
                 return _commitId;
