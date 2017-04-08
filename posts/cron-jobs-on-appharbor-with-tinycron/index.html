@@ -1,0 +1,228 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Bates Westmoreland | Cron Jobs on AppHarbor with TinyCron</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="Bates Westmoreland">
+        <meta name="author" content="Bates Westmoreland">
+
+        <meta property="og:image" content="https://secure.gravatar.com/avatar/41d10fd7a29a3966794f772d368ebb13.png?s=600">
+        <meta property="og:title" content="Cron Jobs on AppHarbor with TinyCron">
+        <meta property="og:url" content="http://www.rbwestmoreland.com/posts/cron-jobs-on-appharbor-with-tinycron/">
+        <meta property="og:site_name" content="Bates Westmoreland's Blog">
+        <meta property="og:type" content="blog">
+
+        <link href="/atom.xml" rel="alternate" type="application/atom+xml">
+        <link href="https://plus.google.com/108409924814514542213?rel=author" rel="author" type="text/html">
+        <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0-rc1/css/bootstrap.min.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="/assets/css/main.css">
+        ﻿<!-- start Mixpanel --><script type="text/javascript">(function(f,b){if(!b.__SV){var a,e,i,g;window.mixpanel=b;b._i=[];b.init=function(a,e,d){function f(b,h){var a=h.split(".");2==a.length&&(b=b[a[0]],h=a[1]);b[h]=function(){b.push([h].concat(Array.prototype.slice.call(arguments,0)))}}var c=b;"undefined"!==typeof d?c=b[d]=[]:d="mixpanel";c.people=c.people||[];c.toString=function(b){var a="mixpanel";"mixpanel"!==d&&(a+="."+d);b||(a+=" (stub)");return a};c.people.toString=function(){return c.toString(1)+".people (stub)"};i="disable track track_pageview track_links track_forms register register_once alias unregister identify name_tag set_config people.set people.set_once people.increment people.append people.union people.track_charge people.clear_charges people.delete_user".split(" ");
+for(g=0;g<i.length;g++)f(c,i[g]);b._i.push([a,e,d])};b.__SV=1.2;a=f.createElement("script");a.type="text/javascript";a.async=!0;a.src="undefined"!==typeof MIXPANEL_CUSTOM_LIB_URL?MIXPANEL_CUSTOM_LIB_URL:"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js";e=f.getElementsByTagName("script")[0];e.parentNode.insertBefore(a,e)}})(document,window.mixpanel||[]);
+mixpanel.init("f81925f0fab8f11ddbb9d1c3b00ef058");</script><!-- end Mixpanel -->
+    </head>
+    <body class="container">
+        <section class="row">
+            <div class="col-sm-3">
+                ﻿<nav>
+    <p class="text-center">
+        <a href="/"><img class="img-responsive img-circle" src="https://secure.gravatar.com/avatar/41d10fd7a29a3966794f772d368ebb13.png?s=200&r=x&d=mm" alt="gravatar"/></a>
+        <br>
+        <a href="/" class="full-name">Bates Westmoreland</a>
+        <br>
+        <span class="lead">
+            <a rel="me" href="https://twitter.com/rbwestmoreland" title="twitter" target="_blank"><i class="icon-twitter"></i></a>
+            <a rel="me" href="https://github.com/rbwestmoreland" title="github" target="_blank"><i class="icon-github"></i></a>
+			<a rel="me" href="https://keybase.io/rbwestmoreland" title="keybase" target="_blank"><i class="icon-key"></i></a>
+            <a href="/atom.xml" title="feed" target="_blank"><i class="icon-rss"></i></a>
+        </span>
+        <br>
+        <a href="/" title="posts">posts</a>
+        <br>
+        <a href="/projects" title="projects">projects</a>
+        <br>
+        <a href="/about" title="about">about</a>
+    </p>
+</nav>
+            </div>
+            <div class="col-sm-9">
+                <article>
+    <header>
+        <h1>Cron Jobs on AppHarbor with TinyCron</h1>
+        <time class="text-muted" pubdate="pubdate" datetime="2013-05-11T00:00:00Z">May 11, 2013</time>
+    </header>
+    <section>
+        <p><h2>The Problem</h2>
+
+<p>From time to time we need to run a recurring job to automate some mundane, albeit important, task. Things like: pinging a url, sending an email, or processing a queue.  </p>
+
+<h2>The Solution</h2>
+
+<p>We&#39;ll be using <a href="https://appharbor.com">AppHarbor</a>&#39;s <em>background workers</em> and <a href="https://github.com/rbwestmoreland/TinyCron">TinyCron</a> to schedule and run our recurring jobs.   </p>
+
+<h3>Step1: Creating an AppHarbor background worker</h3>
+
+<p><a href="https://appharbor.com">AppHarbor</a>&#39;s <em>background workers</em> are just .NET console applications.</p>
+<div class="highlight"><pre><code class="text language-text" data-lang="text">using System;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        //your logic
+    }
+}
+</code></pre></div>
+<h3>Step 2: Adding TinyCron</h3>
+
+<p><a href="https://github.com/rbwestmoreland/TinyCron">TinyCron</a> brings cron-like scheduling and execution to .NET.  </p>
+
+<p>Let&#39;s include it in our project. Download a copy of <a href="https://github.com/rbwestmoreland/TinyCron/blob/master/src/TinyCron/TinyCron.cs">TinyCron.cs</a> from GitHub and include it in your project. </p>
+
+<h3>Step 3: Scheduling a Recurring Job</h3>
+
+<p>Let&#39;s bring it all together and schedule a recurring job.  </p>
+<div class="highlight"><pre><code class="text language-text" data-lang="text">using System;
+using TinyCron;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        var tinyCron = new TinyCronApplication();
+        var cronJob = new AnonymousTinyCronJob(&quot;* * * * *&quot;, () =&gt; { /*your logic*/ });
+        tinyCron.Register(cronJob);
+        tinyCron.Start();
+    }
+}
+</code></pre></div>
+<p>OK, that&#39;s simple, but pointless. Let&#39;s actually do something useful. Like pinging a url.  </p>
+<div class="highlight"><pre><code class="text language-text" data-lang="text">using System;
+using System.Net.Http;
+using TinyCron;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        var tinyCron = new TinyCronApplication();
+        var cronJob = new AnonymousTinyCronJob(&quot;* * * * *&quot;, () =&gt; 
+        {
+            using (var httpClient = new HttpClient())
+            {
+                httpClient.GetAsync(&quot;http://example.com&quot;).Wait();
+            }
+        });
+        tinyCron.Register(cronJob);
+        tinyCron.Start();
+    }
+}
+</code></pre></div>
+<p><strong>TinyCron</strong>&#39;s <em>AnonymousTinyCronJob</em> is great for simple jobs. You can also extend <strong>TinyCron</strong>&#39;s <em>TinyCronJob</em> and create reusable jobs.  </p>
+<div class="highlight"><pre><code class="text language-text" data-lang="text">using System;
+using System.Net.Http;
+using TinyCron;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        var tinyCron = new TinyCronApplication();
+        var cronJob = new PingCronJob(&quot;* * * * *&quot;, &quot;http://example.com&quot;);
+        tinyCron.Register(cronJob);
+        tinyCron.Start();
+    }
+}
+
+public class PingCronJob : TinyCronJob
+{
+    private string _url;
+
+    public PingCronJob(string cronExpression, string url)
+        : base(cronExpression)
+    {
+        _url = url;
+    }
+
+    public override void Run()
+    {
+        using (var httpClient = new HttpClient())
+        {
+            httpClient.GetAsync(_url).Wait();
+        }
+    }
+}
+</code></pre></div>
+<h3>Step 4: Deploy to AppHarbor</h3>
+
+<p><strong>AppHarbor</strong> supports deploying your application many different ways. <a href="http://support.appharbor.com/kb/getting-started/deploying-your-first-application-using-git">Learn how</a> to deploy your application to <strong>AppHarbor</strong>.  </p>
+
+<h2>Conclusion</h2>
+
+<p>Congratulations! You have successfully created and deployed an <strong>AppHarbor</strong> <em>background worker</em> which can schedule and execute recurring jobs using <strong>TinyCron</strong>. <strong>AppHarbor</strong> <em>background workers</em> and <strong>TinyCron</strong> make a powerful combination.  </p>
+
+<p><strong>What will AppHarbor &amp; TinyCron automate for you?</strong>  </p>
+</p>
+    </section>
+</article>
+
+<script type="text/javascript">
+if (mixpanel) {
+  mixpanel.track("post viewed", {
+    "title": "Cron Jobs on AppHarbor with TinyCron"
+  });
+}
+</script>
+            </div>
+        </section>
+        ﻿<section class="row">
+    <footer class="col-12">
+        <p class="text-center text-muted">
+            <small>Copyright © 2012-2016 Bates Westmoreland</small>
+        </p>
+    </footer>
+</section>
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0-rc1/js/bootstrap.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.11.1/moment.min.js"></script>
+        <script src="/assets/js/main.js"></script>
+        ﻿<script type="text/javascript">
+  var _gauges = _gauges || [];
+  (function() {
+    var t   = document.createElement('script');
+    t.type  = 'text/javascript';
+    t.async = true;
+    t.id    = 'gauges-tracker';
+    t.setAttribute('data-site-id', '50244115613f5d595600004e');
+    t.src = '//secure.gaug.es/track.js';
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(t, s);
+  })();
+</script>
+        ﻿<script type="text/javascript">
+window.app = window.app || {};
+app.prettyPrint = app.prettyPrint || {};
+app.prettyPrint.load = function() {
+    $('head').append('<script src="//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js"></'+'script>');
+    $('head').append('<link href="//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css" rel="stylesheet" type="text/css">');
+};
+app.prettyPrint.run = function() {
+    if(window.prettyPrint) {
+        $('pre').addClass('prettyprint');
+        window.prettyPrint();
+        $('pre').removeClass('prettyprint');
+    }
+    else {
+        setTimeout(app.prettyPrint.run, 100);
+    }
+};
+
+$(document).ready(function () {
+    app.prettyPrint.load();
+    app.prettyPrint.run();
+});
+</script>
+    </body>
+</html>

@@ -1,0 +1,753 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+ 
+ <title>Bates Westmoreland</title>
+ <link href="http://www.rbwestmoreland.com/atom.xml" rel="self"/>
+ <link href="http://www.rbwestmoreland.com/"/>
+ <updated>2017-04-08T14:36:22-04:00</updated>
+ <id>http://www.rbwestmoreland.com/</id>
+ <author>
+   <name>Bates Westmoreland</name>
+   <email>rbwestmoreland@gmail.com</email>
+ </author>
+
+ 
+ <entry>
+   <title>Finding the Git Commit Id of your continuously deployed Azure Web App</title>
+   <link href="http://www.rbwestmoreland.com/posts/finding-the-git-commit-id-of-your-continuously-deployed-azure-web-app"/>
+   <updated>2016-01-13T00:00:00-05:00</updated>
+   <id>http://www.rbwestmoreland.com/posts/finding-the-git-commit-id-of-your-continuously-deployed-azure-web-app</id>
+   <content type="html">&lt;p&gt;Azure supports &lt;a href=&quot;https://azure.microsoft.com/en-us/documentation/articles/web-sites-publish-source-control/&quot;&gt;continuous deployment&lt;/a&gt; of Azure Web Apps from sources like GitHub and BitBucket. Recently, I found the need for the Git commit id of my currently deployed Azure Web Site. I was surprised to find it was not readily available. Here is where you can find it.&lt;/p&gt;
+
+&lt;h2&gt;Kudu&lt;/h2&gt;
+
+&lt;p&gt;After some research, I learned that Azure uses &lt;a href=&quot;https://github.com/projectkudu/kudu&quot;&gt;Kudu&lt;/a&gt; as the system for Git deployments of Azure Web Apps. I also discovered this &lt;a href=&quot;https://github.com/projectkudu/kudu/issues/1336&quot;&gt;issue&lt;/a&gt; where another person was looking for their Git commit id as well. Near the end of the conversation, David Ebbo provides us &lt;a href=&quot;https://github.com/projectkudu/kudu/issues/1336#issuecomment-55974966&quot;&gt;two options&lt;/a&gt; where we can find our Git commit id. &lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;In the environment variable &lt;code&gt;SCM_COMMIT_ID&lt;/code&gt; &lt;u&gt;during&lt;/u&gt; the deployment process&lt;/li&gt;
+&lt;li&gt;In the file &lt;code&gt;%home%\site\deployments\active&lt;/code&gt; &lt;u&gt;after&lt;/u&gt; the deployment process&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Being a developer, I would rather write code than write deployment scripts. So, I picked option two.&lt;/p&gt;
+
+&lt;h2&gt;Code&lt;/h2&gt;
+
+&lt;p&gt;The only text inside the &lt;code&gt;%home%\site\deployments\active&lt;/code&gt; file is the Git commit id. So, all we need to do is read the contents of the file.&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;text language-text&quot; data-lang=&quot;text&quot;&gt;using System;
+using System.IO;
+
+namespace Azure
+{
+    public static class Deployment
+    {
+        private static string _commitId;
+
+        public static string GetGitCommitId()
+        {
+            if (_commitId != null)
+                return _commitId;
+
+            var path = Environment.ExpandEnvironmentVariables(@&amp;quot;%home%\site\deployments\active&amp;quot;);
+
+            _commitId = File.Exists(path)
+                      ? File.ReadAllText(path)
+                      : string.Empty;
+
+            return _commitId;
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2&gt;Caution&lt;/h2&gt;
+
+&lt;p&gt;As David Ebbo points out in his &lt;a href=&quot;https://github.com/projectkudu/kudu/issues/1336#issuecomment-55974966&quot;&gt;comment&lt;/a&gt;, using this file does make some assumptions about the Kudu file structure. So, it may change in the future.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Inversion of Control in ASP.NET Web API</title>
+   <link href="http://www.rbwestmoreland.com/posts/inversion-of-control-in-asp-net-web-api"/>
+   <updated>2013-11-09T00:00:00-05:00</updated>
+   <id>http://www.rbwestmoreland.com/posts/inversion-of-control-in-asp-net-web-api</id>
+   <content type="html">&lt;p&gt;Adding Inversion of Control to ASP.NET Web API provides tremendous value. Our &lt;code&gt;ApiController&lt;/code&gt;s become decoupled from the rest of our codebase, no longer have to manage their dependencies, and become easier to test. Adding Inversion of Control is simple and only takes a few lines of code.&lt;/p&gt;
+
+&lt;h2&gt;IDependencyResolver&lt;/h2&gt;
+
+&lt;p&gt;ASP.NET Web API provides an abstraction for dependency injection containers with the &lt;code&gt;IDependencyResolver&lt;/code&gt; &amp;amp; &lt;code&gt;IDependencyScope&lt;/code&gt; interfaces.&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;text language-text&quot; data-lang=&quot;text&quot;&gt;using System;
+
+namespace System.Web.Http.Dependencies
+{
+    // Summary:
+    //     Represents a dependency injection container.
+    public interface IDependencyResolver : IDependencyScope, IDisposable
+    {
+        // Summary:
+        //     Starts a resolution scope.
+        //
+        // Returns:
+        //     The dependency scope.
+        IDependencyScope BeginScope();
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;!--hulk smash!--&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;text language-text&quot; data-lang=&quot;text&quot;&gt;using System;
+using System.Collections.Generic;
+
+namespace System.Web.Http.Dependencies
+{
+    // Summary:
+    //     Represents an interface for the range of the dependencies.
+    public interface IDependencyScope : IDisposable
+    {
+        // Summary:
+        //     Retrieves a service from the scope.
+        //
+        // Parameters:
+        //   serviceType:
+        //     The service to be retrieved.
+        //
+        // Returns:
+        //     The retrieved service.
+        object GetService(Type serviceType);
+        //
+        // Summary:
+        //     Retrieves a collection of services from the scope.
+        //
+        // Parameters:
+        //   serviceType:
+        //     The collection of services to be retrieved.
+        //
+        // Returns:
+        //     The retrieved collection of services.
+        IEnumerable&amp;lt;object&amp;gt; GetServices(Type serviceType);
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2&gt;Implementing IDependencyResolver&lt;/h2&gt;
+
+&lt;p&gt;There are many IoC containers out there. Any will do. In this example, we will use my favorite, &lt;a href=&quot;https://github.com/grumpydev/TinyIoC&quot;&gt;TinyIoC&lt;/a&gt;.&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;text language-text&quot; data-lang=&quot;text&quot;&gt;using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web.Http.Dependencies;
+using TinyIoC;
+
+public class TinyIoCDependencyResolver : IDependencyResolver
+{
+    private TinyIoCContainer _container;
+
+    public TinyIoCDependencyResolver(TinyIoCContainer container)
+    {
+        if (container == null)
+            throw new ArgumentNullException(&amp;quot;container&amp;quot;);
+
+        _container = container;
+    }
+
+    public IDependencyScope BeginScope()
+    {
+        if (_disposed)
+            throw new ObjectDisposedException(&amp;quot;this&amp;quot;, &amp;quot;This scope has already been disposed.&amp;quot;);
+
+        return new TinyIoCDependencyResolver(_container.GetChildContainer());
+    }
+
+    public object GetService(Type serviceType)
+    {
+        if (_disposed)
+            throw new ObjectDisposedException(&amp;quot;this&amp;quot;, &amp;quot;This scope has already been disposed.&amp;quot;);
+
+        try
+        {
+            return _container.Resolve(serviceType);
+        }
+        catch (TinyIoCResolutionException)
+        {
+            return null;
+        }
+    }
+
+    public IEnumerable&amp;lt;object&amp;gt; GetServices(Type serviceType)
+    {
+        if (_disposed)
+            throw new ObjectDisposedException(&amp;quot;this&amp;quot;, &amp;quot;This scope has already been disposed.&amp;quot;);
+
+        try
+        {
+            return _container.ResolveAll(serviceType);
+        }
+        catch (TinyIoCResolutionException)
+        {
+            return Enumerable.Empty&amp;lt;object&amp;gt;();
+        }
+    }
+
+    #region IDisposable
+
+    bool _disposed;
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_disposed)
+            return;
+
+        if (disposing)
+            _container.Dispose();
+
+        _disposed = true;
+    }
+
+    #endregion IDisposable
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2&gt;Using IDependencyResolver&lt;/h2&gt;
+
+&lt;p&gt;Using our &lt;code&gt;IDependencyResolver&lt;/code&gt; is simple, all we have to do is to register it with our ASP.NET Web API configuration.&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;text language-text&quot; data-lang=&quot;text&quot;&gt;var container = new TinyIoCContainer();
+container.Register&amp;lt;IMyDependency&amp;gt;(new MyDependency());
+
+GlobalConfiguration.Configuration.DependencyResolver = new TinyIoCDependencyResolver(container);
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Now, the instantiation of our &lt;code&gt;ApiController&lt;/code&gt;s pass through our IoC container, injecting our dependencies along the way. Here is an example &lt;code&gt;ApiController&lt;/code&gt; with a dependency:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;text language-text&quot; data-lang=&quot;text&quot;&gt;using System;
+using System.Net;
+using System.Net.Http;
+using System.Web.Http;
+
+public class ExampleController : ApiController
+{
+    private IMyDependency _myDependency;
+
+    public ExampleController(IMyDependency myDependency)
+    {
+        if (myDependency == null)
+            throw new ArgumentNullException(&amp;quot;myDependency&amp;quot;);
+
+        _myDependency = myDependency;
+    }
+
+    [HttpGet]
+    [Route(&amp;quot;example&amp;quot;)]
+    public HttpResponseMessage Test()
+    {
+        var model = new { Message = &amp;quot;dependency injected!&amp;quot; };
+        return Request.CreateResponse(HttpStatusCode.OK, model);
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;In a few lines of code, we have added tremendous value to our ASP.NET Web API. Our &lt;code&gt;ApiController&lt;/code&gt;s are decoupled from the rest of our codebase, no longer have to manage their dependencies, and are easier to test!&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Instrumenting ASP.NET Web API</title>
+   <link href="http://www.rbwestmoreland.com/posts/instrumenting-asp-net-web-api"/>
+   <updated>2013-09-13T00:00:00-04:00</updated>
+   <id>http://www.rbwestmoreland.com/posts/instrumenting-asp-net-web-api</id>
+   <content type="html">&lt;p&gt;Monitoring our deployed applications is important. It is a proactive approach to finding errors, performance problems, peak usage times, abuse, and much more. When monitoring an API, the following is a good set of starting data-points:&lt;/p&gt;
+
+&lt;h3&gt;The Request&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;The Url&lt;/li&gt;
+&lt;li&gt;The User&amp;#39;s Id&lt;/li&gt;
+&lt;li&gt;The User&amp;#39;s IP Address&lt;/li&gt;
+&lt;li&gt;The Timestamp&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3&gt;The Response&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;The Http Status Code&lt;/li&gt;
+&lt;li&gt;The Response Time&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3&gt;The Server&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;The Machine&amp;#39;s Name&lt;/li&gt;
+&lt;li&gt;The API Version&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1&gt;An Example in ASP.NET Web API&lt;/h1&gt;
+
+&lt;p&gt;The easiest approach to instrumenting in ASP.NET Web API is by using a DelegatingHandler. They sit between the caller and the ApiController in the ASP.NET Web API pipeline.&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;text language-text&quot; data-lang=&quot;text&quot;&gt;using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace System.Net.Http.Instrumentation
+{
+    public class TransactionLoggingHandler : DelegatingHandler
+    {
+        protected async override Task&amp;lt;HttpResponseMessage&amp;gt; SendAsync(HttpRequestMessage request,
+            CancellationToken cancellationToken)
+        {
+            var response = await base.SendAsync(request, cancellationToken);
+            return response;
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;As you can see we have access to both the HttpRequestMessage and the HttpResponseMessage. This is an ideal approach because we can inspect all transactions in the ASP.NET Web API pipeline. Let us continue by expanding on our initial DelegatingHandler and extract our data-points from the request and response.&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;text language-text&quot; data-lang=&quot;text&quot;&gt;using System;
+using System.Diagnostics;
+using System.Net.Http;
+using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace System.Net.Http.Instrumentation
+{
+    public class TransactionLoggingHandler : DelegatingHandler
+    {
+        protected async override Task&amp;lt;HttpResponseMessage&amp;gt; SendAsync(HttpRequestMessage request,
+            CancellationToken cancellationToken)
+        {
+            var stopwatch = Stopwatch.Start();
+            var response = await base.SendAsync(request, cancellationToken);
+            stopwatch.Stop();
+
+            Log(request, response, stopwatch);
+
+            return response;
+        }
+
+        private void Log(HttpRequestMessage request, HttpResponseMessage response, Stopwatch stopwatch)
+        {
+            //request properties
+            var requestMethod = request.Method.Method;
+            var requestUri = request.RequestUri.ToString();
+            var requestTimestamp = DateTime.UtcNow;
+            var requestUserId = Thread.CurrentPrincipal.Identity.Name;
+            var requestIpAddress = RetrieveClientIPAddress(request);
+
+            //response properties
+            var responseStatusCode = (int)response.StatusCode;
+            var responseTimeInMilliseconds = stopwatch.ElapsedMilliseconds;
+
+            //server &amp;amp;, application properties
+            var machineName = Environment.MachineName;
+            var releaseVersion = Assembly.GetExecutingAssembly().GetName().Version;
+
+            //todo: log to your favorite persistence store
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Now, let us make our logging asynchronous. By using &lt;code&gt;Task.Run(...)&lt;/code&gt;, our response will be returned to the consumer without waiting for our logging task to complete. This allows us to log our transactions without increasing our APIs response times.&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;text language-text&quot; data-lang=&quot;text&quot;&gt;using System;
+using System.Diagnostics;
+using System.Net.Http;
+using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace System.Net.Http.Instrumentation
+{
+    public class TransactionLoggingHandler : DelegatingHandler
+    {
+        protected async override Task&amp;lt;HttpResponseMessage&amp;gt; SendAsync(HttpRequestMessage request,
+            CancellationToken cancellationToken)
+        {
+            var stopwatch = Stopwatch.Start();
+            var response = await base.SendAsync(request, cancellationToken);
+            stopwatch.Stop();
+
+            Task.Run(() =&amp;gt; Log(request, response, stopwatch), cancellationToken);
+
+            return response;
+        }
+
+        private void Log(HttpRequestMessage request, HttpResponseMessage response, Stopwatch stopwatch)
+        {
+            //request properties
+            var requestMethod = request.Method.Method;
+            var requestUri = request.RequestUri.ToString();
+            var requestTimestamp = DateTime.UtcNow;
+            var requestUserId = Thread.CurrentPrincipal.Identity.Name;
+            var requestIpAddress = RetrieveClientIPAddress(request);
+
+            //response properties
+            var responseStatusCode = (int)response.StatusCode;
+            var responseTimeInMilliseconds = stopwatch.ElapsedMilliseconds;
+
+            //server &amp;amp;, application properties
+            var machineName = Environment.MachineName;
+            var releaseVersion = Assembly.GetExecutingAssembly().GetName().Version;
+
+            //todo: log to your favorite persistence store
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Finally, we need to add our DelegatingHandler to the ASP.NET Web API pipeline.&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;text language-text&quot; data-lang=&quot;text&quot;&gt;GlobalConfiguration.Configuration.MessageHandlers.Add(new TransactionLoggingHandler());
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h1&gt;Closing Considerations&lt;/h1&gt;
+
+&lt;p&gt;As you can see, I have left a &lt;code&gt;todo&lt;/code&gt; for storing your transactions to your favorite persistence store. How you store and later analyze your data-points is up to you. Depending on the type of analysis and the amount of traffic your API receives you may not want to store &lt;em&gt;every&lt;/em&gt; transaction. Experiment until you find a good sampling of data to retain for your specific needs.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Cron Jobs on AppHarbor with TinyCron</title>
+   <link href="http://www.rbwestmoreland.com/posts/cron-jobs-on-appharbor-with-tinycron"/>
+   <updated>2013-05-11T00:00:00-04:00</updated>
+   <id>http://www.rbwestmoreland.com/posts/cron-jobs-on-appharbor-with-tinycron</id>
+   <content type="html">&lt;h2&gt;The Problem&lt;/h2&gt;
+
+&lt;p&gt;From time to time we need to run a recurring job to automate some mundane, albeit important, task. Things like: pinging a url, sending an email, or processing a queue.  &lt;/p&gt;
+
+&lt;h2&gt;The Solution&lt;/h2&gt;
+
+&lt;p&gt;We&amp;#39;ll be using &lt;a href=&quot;https://appharbor.com&quot;&gt;AppHarbor&lt;/a&gt;&amp;#39;s &lt;em&gt;background workers&lt;/em&gt; and &lt;a href=&quot;https://github.com/rbwestmoreland/TinyCron&quot;&gt;TinyCron&lt;/a&gt; to schedule and run our recurring jobs.   &lt;/p&gt;
+
+&lt;h3&gt;Step1: Creating an AppHarbor background worker&lt;/h3&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://appharbor.com&quot;&gt;AppHarbor&lt;/a&gt;&amp;#39;s &lt;em&gt;background workers&lt;/em&gt; are just .NET console applications.&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;text language-text&quot; data-lang=&quot;text&quot;&gt;using System;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        //your logic
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3&gt;Step 2: Adding TinyCron&lt;/h3&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://github.com/rbwestmoreland/TinyCron&quot;&gt;TinyCron&lt;/a&gt; brings cron-like scheduling and execution to .NET.  &lt;/p&gt;
+
+&lt;p&gt;Let&amp;#39;s include it in our project. Download a copy of &lt;a href=&quot;https://github.com/rbwestmoreland/TinyCron/blob/master/src/TinyCron/TinyCron.cs&quot;&gt;TinyCron.cs&lt;/a&gt; from GitHub and include it in your project. &lt;/p&gt;
+
+&lt;h3&gt;Step 3: Scheduling a Recurring Job&lt;/h3&gt;
+
+&lt;p&gt;Let&amp;#39;s bring it all together and schedule a recurring job.  &lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;text language-text&quot; data-lang=&quot;text&quot;&gt;using System;
+using TinyCron;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        var tinyCron = new TinyCronApplication();
+        var cronJob = new AnonymousTinyCronJob(&amp;quot;* * * * *&amp;quot;, () =&amp;gt; { /*your logic*/ });
+        tinyCron.Register(cronJob);
+        tinyCron.Start();
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;OK, that&amp;#39;s simple, but pointless. Let&amp;#39;s actually do something useful. Like pinging a url.  &lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;text language-text&quot; data-lang=&quot;text&quot;&gt;using System;
+using System.Net.Http;
+using TinyCron;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        var tinyCron = new TinyCronApplication();
+        var cronJob = new AnonymousTinyCronJob(&amp;quot;* * * * *&amp;quot;, () =&amp;gt; 
+        {
+            using (var httpClient = new HttpClient())
+            {
+                httpClient.GetAsync(&amp;quot;http://example.com&amp;quot;).Wait();
+            }
+        });
+        tinyCron.Register(cronJob);
+        tinyCron.Start();
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;strong&gt;TinyCron&lt;/strong&gt;&amp;#39;s &lt;em&gt;AnonymousTinyCronJob&lt;/em&gt; is great for simple jobs. You can also extend &lt;strong&gt;TinyCron&lt;/strong&gt;&amp;#39;s &lt;em&gt;TinyCronJob&lt;/em&gt; and create reusable jobs.  &lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;text language-text&quot; data-lang=&quot;text&quot;&gt;using System;
+using System.Net.Http;
+using TinyCron;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        var tinyCron = new TinyCronApplication();
+        var cronJob = new PingCronJob(&amp;quot;* * * * *&amp;quot;, &amp;quot;http://example.com&amp;quot;);
+        tinyCron.Register(cronJob);
+        tinyCron.Start();
+    }
+}
+
+public class PingCronJob : TinyCronJob
+{
+    private string _url;
+
+    public PingCronJob(string cronExpression, string url)
+        : base(cronExpression)
+    {
+        _url = url;
+    }
+
+    public override void Run()
+    {
+        using (var httpClient = new HttpClient())
+        {
+            httpClient.GetAsync(_url).Wait();
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3&gt;Step 4: Deploy to AppHarbor&lt;/h3&gt;
+
+&lt;p&gt;&lt;strong&gt;AppHarbor&lt;/strong&gt; supports deploying your application many different ways. &lt;a href=&quot;http://support.appharbor.com/kb/getting-started/deploying-your-first-application-using-git&quot;&gt;Learn how&lt;/a&gt; to deploy your application to &lt;strong&gt;AppHarbor&lt;/strong&gt;.  &lt;/p&gt;
+
+&lt;h2&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;Congratulations! You have successfully created and deployed an &lt;strong&gt;AppHarbor&lt;/strong&gt; &lt;em&gt;background worker&lt;/em&gt; which can schedule and execute recurring jobs using &lt;strong&gt;TinyCron&lt;/strong&gt;. &lt;strong&gt;AppHarbor&lt;/strong&gt; &lt;em&gt;background workers&lt;/em&gt; and &lt;strong&gt;TinyCron&lt;/strong&gt; make a powerful combination.  &lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;What will AppHarbor &amp;amp; TinyCron automate for you?&lt;/strong&gt;  &lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Unit Testing DateTime.Now with System.Clock</title>
+   <link href="http://www.rbwestmoreland.com/posts/unit-testing-datetime-now-with-system-clock"/>
+   <updated>2012-12-08T00:00:00-05:00</updated>
+   <id>http://www.rbwestmoreland.com/posts/unit-testing-datetime-now-with-system-clock</id>
+   <content type="html">&lt;h2&gt;The Problem&lt;/h2&gt;
+
+&lt;p&gt;Unit testing code that uses &lt;code&gt;DateTime.Now&lt;/code&gt; is difficult. Take this class for example:  &lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;text language-text&quot; data-lang=&quot;text&quot;&gt;public class MyEntity
+{
+    public DateTime CreatedOn { get; private set; }
+
+    public MyEntity()
+    {
+        CreatedOn = DateTime.Now;
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;and its accompanying unit test:  &lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;text language-text&quot; data-lang=&quot;text&quot;&gt;[TestMethod]
+public void WhenInstantiated_CreatedOnShouldEqualDateTimeNow()
+{
+    var actual = new MyEntity();
+
+    Assert.AreEqual(DateTime.Now, actual.CreatedOn);
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This unit test will pass &lt;strong&gt;&lt;em&gt;sometimes&lt;/em&gt;&lt;/strong&gt;. Why? That&amp;#39;s because the behavior of &lt;code&gt;DateTime.Now&lt;/code&gt; is non-deterministic. We have no idea what &lt;code&gt;DateTime.Now&lt;/code&gt; will return. This makes unit testing code that uses &lt;code&gt;DateTime.Now&lt;/code&gt; difficult.&lt;/p&gt;
+
+&lt;p&gt;Convention tells us we should isolate such a dependency.&lt;/p&gt;
+
+&lt;h2&gt;The Solution&lt;/h2&gt;
+
+&lt;p&gt;&lt;code&gt;System.Clock&lt;/code&gt; is one of many solutions to this common problem, and is available via NuGet.  &lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;text language-text&quot; data-lang=&quot;text&quot;&gt;PM&amp;gt; Install-Package System.Clock
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Here is the same class, refactored to use &lt;code&gt;System.Clock&lt;/code&gt;:  &lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;text language-text&quot; data-lang=&quot;text&quot;&gt;public class MyEntity
+{
+    public DateTime CreatedOn { get; private set; }
+
+    public MyEntity()
+    {
+        CreatedOn = Clock.Now;
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;and its accompanying unit test, refactored to use &lt;code&gt;System.Clock&lt;/code&gt;:  &lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;text language-text&quot; data-lang=&quot;text&quot;&gt;[TestMethod]
+public void WhenInstantiated_CreatedOnShouldEqualDateTimeNow()
+{
+    Clock.Freeze();
+    var actual = new MyEntity();
+
+    Assert.AreEqual(Clock.Now, actual.CreatedOn);
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This unit test will pass &lt;strong&gt;&lt;em&gt;all the time&lt;/em&gt;&lt;/strong&gt;. Why? That&amp;#39;s because the behavior of &lt;code&gt;Clock.Now&lt;/code&gt; has been isolated and is now deterministic. By calling &lt;code&gt;Clock.Freeze()&lt;/code&gt;, we stop time. Now, each call to &lt;code&gt;Clock.Now&lt;/code&gt; will always be the same. Now we can unit test with confidence.&lt;/p&gt;
+
+&lt;hr&gt;
+
+&lt;h2&gt;More&lt;/h2&gt;
+
+&lt;p&gt;Other features of &lt;code&gt;System.Clock&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;text language-text&quot; data-lang=&quot;text&quot;&gt;Clock.Freeze(new DateTime(2012, 12, 21));//freeze at a specific time
+Clock.Unfreeze(); //return time to the present
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;See the source and package on &lt;a href=&quot;https://github.com/rbwestmoreland/system.clock&quot;&gt;GitHub&lt;/a&gt; &amp;amp; &lt;a href=&quot;http://nuget.org/packages/System.Clock&quot;&gt;NuGet&lt;/a&gt;&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Hello Typeset</title>
+   <link href="http://www.rbwestmoreland.com/posts/hello-typeset"/>
+   <updated>2012-08-11T00:00:00-04:00</updated>
+   <id>http://www.rbwestmoreland.com/posts/hello-typeset</id>
+   <content type="html">&lt;p&gt;Since I said &lt;a href=&quot;/posts/goodbye-posterous&quot;&gt;goodbye to Posterous&lt;/a&gt;, I have been in search
+of a new blog engine. I really liked &lt;a href=&quot;https://github.com/mojombo/jekyll&quot;&gt;Jekyll&lt;/a&gt;, but 
+I decided to build my own blog engine, &lt;a href=&quot;https://github.com/typeset/typeset&quot;&gt;Typeset&lt;/a&gt;.  &lt;/p&gt;
+
+&lt;h2&gt;About&lt;/h2&gt;
+
+&lt;p&gt;Typeset is a lightweight blog engine. It is open source and licensed 
+under the MIT license.  &lt;/p&gt;
+
+&lt;h4&gt;Features&lt;/h4&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Write in &lt;a href=&quot;http://daringfireball.net/projects/markdown&quot;&gt;markdown&lt;/a&gt; and &lt;a href=&quot;http://textile.sitemonks.com&quot;&gt;textile&lt;/a&gt; &lt;/li&gt;
+&lt;li&gt;Style in Css, &lt;a href=&quot;http://lesscss.org&quot;&gt;LESS&lt;/a&gt;, and &lt;a href=&quot;http://sass-lang.com&quot;&gt;Sass&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Script in JavaScript and &lt;a href=&quot;http://coffeescript.org&quot;&gt;CoffeeScript&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Automatic compilation, bundling, and minification of all styles and scripts&lt;/li&gt;
+&lt;li&gt;Automatic atom feed generation&lt;/li&gt;
+&lt;li&gt;REST API for your posts&lt;/li&gt;
+&lt;li&gt;HTML5 Layout&lt;/li&gt;
+&lt;li&gt;No database&lt;br&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;hr&gt;
+
+&lt;h2&gt;Getting Started&lt;/h2&gt;
+
+&lt;p&gt;Typeset is easy to use. Our &lt;a href=&quot;https://github.com/typeset/typeset/wiki&quot;&gt;wiki&lt;/a&gt; 
+has detailed guides to get you started. You can also checkout our 
+&lt;a href=&quot;https://github.com/typeset/typeset-sample-site&quot;&gt;sample Typeset site&lt;/a&gt; to get 
+you started.  &lt;/p&gt;
+
+&lt;h4&gt;Example Post&lt;/h4&gt;
+
+&lt;p&gt;Write your posts in &lt;a href=&quot;http://daringfireball.net/projects/markdown&quot;&gt;markdown&lt;/a&gt; 
+or &lt;a href=&quot;http://textile.sitemonks.com&quot;&gt;textile&lt;/a&gt;. You have complete control over your 
+post&amp;#39;s title, publish date, and permalinks.  &lt;/p&gt;
+
+&lt;h2&gt;&lt;pre&gt;&lt;/h2&gt;
+
+&lt;p&gt;title: Hello World
+date: 2012-06-19 16:46:51 -04:00
+permalink: &lt;/p&gt;
+
+&lt;h2&gt; - posts/hello-world&lt;/h2&gt;
+
+&lt;p&gt;This is my first typeset post!
+&lt;/pre&gt;&lt;/p&gt;
+
+&lt;h4&gt;Easy to Deploy&lt;/h4&gt;
+
+&lt;p&gt;Deploy Typeset to your favorite PaaS using &lt;a href=&quot;http://typeset-deploy.apphb.com/&quot;&gt;Typeset Deploy&lt;/a&gt;. &lt;/p&gt;
+
+&lt;h4&gt;Typeset Loves Git&lt;/h4&gt;
+
+&lt;p&gt;Typeset loves git. Your content should live in a git repository, not in an inaccessible database. 
+Typeset will automatically clone your repository with all your content and serve it. 
+Push changes to your repository? No problem. Typeset will pull in those changes, updating your 
+site. Nothing for you to worry about. &lt;strong&gt;&lt;em&gt;This is how blogging should feel.&lt;/em&gt;&lt;/strong&gt;  &lt;/p&gt;
+
+&lt;hr&gt;
+
+&lt;h2&gt;More&lt;/h2&gt;
+
+&lt;p&gt;Learn more about Typeset&amp;#39;s features and how to get started &lt;a href=&quot;https://github.com/typeset/typeset&quot;&gt;over at GitHub&lt;/a&gt;.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Goodbye Posterous</title>
+   <link href="http://www.rbwestmoreland.com/posts/goodbye-posterous"/>
+   <updated>2012-06-03T00:00:00-04:00</updated>
+   <id>http://www.rbwestmoreland.com/posts/goodbye-posterous</id>
+   <content type="html">&lt;p&gt;My relationship with &lt;a href=&quot;http://posterous.com&quot;&gt;Posterous&lt;/a&gt; is rocky. It has been 
+since I started using it as my blogging platform in December of 2011. It is a fine 
+platform, with tons of features. Free. Amazing themes. Custom domains.
+Autopost to Facebook and Twitter. Despite all these great features, I am still 
+choosing to leave Posterous.  &lt;/p&gt;
+
+&lt;p&gt;After making the decision to leave Posterous, I need to find a new blogging 
+platform. What exactly am I looking for? I want to write my posts in 
+&lt;a href=&quot;http://daringfireball.net/projects/markdown/&quot;&gt;markdown&lt;/a&gt;. That way my posts 
+are portable and easy to style. My code snippets will be 
+&lt;a href=&quot;https://gist.github.com&quot;&gt;gist&lt;/a&gt;s. So, it should also support custom JavaScript. 
+I also want to create my post&amp;#39;s permalinks. Finally, I want my content to be 
+under source control, preferably on &lt;a href=&quot;https://github.com&quot;&gt;GitHub&lt;/a&gt;. That is what I 
+am looking for.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Introducing Jabbot - A JabbR Robot</title>
+   <link href="http://www.rbwestmoreland.com/posts/introducing-jabbot-a-jabbr-robot"/>
+   <updated>2012-05-03T00:00:00-04:00</updated>
+   <id>http://www.rbwestmoreland.com/posts/introducing-jabbot-a-jabbr-robot</id>
+   <content type="html">&lt;p&gt;&lt;strong&gt;Jabbot is a JabbR robot&lt;/strong&gt;, inspired by Github&amp;#39;s &lt;a href=&quot;http://hubot.github.com&quot;&gt;Hubot&lt;/a&gt; and David Fowler&amp;#39;s own &lt;a href=&quot;https://github.com/davidfowl/Jabbot&quot;&gt;Jabbot&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;I set out to improve upon Fowler&amp;#39;s project. In the process, I also ported over my favorite Hubot scripts. Once I was satisfied with my progress, I submitted Jabbot to &lt;a href=&quot;https://appharbor.com&quot;&gt;AppHarbor&lt;/a&gt;&amp;#39;s &lt;a href=&quot;http://blog.appharbor.com/2012/02/22/appharbor-community-application-program&quot;&gt;Community Application Program&lt;/a&gt; and was quickly accepted. Jabbot is currently being hosted for free by AppHarbor at &lt;a href=&quot;http://jabbot.apphb.com&quot;&gt;jabbot.apphb.com&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Jabbot is currently on &lt;a href=&quot;http://jabbr.net&quot;&gt;http://jabbr.net&lt;/a&gt;. Just invite him to your room using the fowolling command: &lt;code&gt;/msg jabbot.apphb.com join room ourkickassroom&lt;/code&gt;. Once joined, Jabbot listens for commands, like: &lt;code&gt;calc 2+2&lt;/code&gt; or &lt;code&gt;weather in Atlanta&lt;/code&gt;. Jabbot not only makes your life easier, but also makes you laugh. (Try using the word &lt;code&gt;carlton&lt;/code&gt; in conversation.) Learn more about Jabbot and his capabilites at&lt;a href=&quot;http://jabbot.apphb.com&quot;&gt; jabbot.apphb.com&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Running your own JabbR instance? Don&amp;#39;t worry, Jabbot will work with any JabbR installation. Learn how to host your own Jabbot instance at &lt;a href=&quot;https://github.com/rbwestmoreland/Jabbot&quot;&gt;Github&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Jabbot is open source and on Github (&lt;a href=&quot;https://github.com/rbwestmoreland/Jabbot&quot;&gt;https://github.com/rbwestmoreland/Jabbot&lt;/a&gt;). Jabbot has also been accepted into &lt;a href=&quot;https://appharbor.com&quot;&gt;AppHarbor&lt;/a&gt;&amp;#39;s &lt;a href=&quot;http://blog.appharbor.com/2012/02/22/appharbor-community-application-program&quot;&gt;Community Application Program&lt;/a&gt; and is hosted for free on their excellent platform.&lt;/p&gt;
+
+&lt;p&gt;Questions or Comments? &lt;a href=&quot;https://twitter.com/#!/rbwestmoreland&quot;&gt;@rbwesmoreland&lt;/a&gt; on &lt;a href=&quot;https://twitter.com&quot;&gt;twitter&lt;/a&gt; or on &lt;a href=&quot;http://jabbr.net&quot;&gt;JabbR.net&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Suggestions or Issues? &lt;a href=&quot;https://github.com/rbwestmoreland/Jabbot/issues&quot;&gt;https://github.com/rbwestmoreland/Jabbot/issues&lt;/a&gt;&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>JenkinsHUD Updates</title>
+   <link href="http://www.rbwestmoreland.com/posts/jenkinshud-updates"/>
+   <updated>2012-03-22T00:00:00-04:00</updated>
+   <id>http://www.rbwestmoreland.com/posts/jenkinshud-updates</id>
+   <content type="html">&lt;p&gt;Since introducing &lt;a href=&quot;https://github.com/rbwestmoreland/JenkinsHUD&quot;&gt;JenkinsHUD&lt;/a&gt;, a team oriented UI of &lt;a href=&quot;http://jenkins-ci.org&quot;&gt;Jenkins&lt;/a&gt; job statuses, I have been hard at work on providing additional features. I am happy to annouce the follow new features:  &lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Filter jobs by views (the same ones you are using in your Jenkins instance)&lt;br&gt;&lt;/li&gt;
+&lt;li&gt;Two ways to use JenkinsHUD&lt;br&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Locally (&lt;a href=&quot;https://github.com/rbwestmoreland/JenkinsHUD&quot;&gt;Download from Github&lt;/a&gt;)&lt;br&gt;&lt;/li&gt;
+&lt;li&gt;Online (&lt;a href=&quot;http://rbwestmoreland.github.com/JenkinsHUD&quot;&gt;Try it out now!&lt;/a&gt;)&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;Multiple UI improvements&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;!--more--&gt;  
+
+&lt;p&gt;Follow JenkinsHUD on Github: &lt;a href=&quot;https://github.com/rbwestmoreland/JenkinsHUD&quot;&gt;https://github.com/rbwestmoreland/JenkinsHUD&lt;/a&gt;&lt;br&gt;
+Use JenkinsHUD: &lt;a href=&quot;http://rbwestmoreland.github.com/JenkinsHUD&quot;&gt;http://rbwestmoreland.github.com/JenkinsHUD&lt;/a&gt;  &lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Introducing JenkinsHUD</title>
+   <link href="http://www.rbwestmoreland.com/posts/introducing-jenkinshud"/>
+   <updated>2012-03-16T00:00:00-04:00</updated>
+   <id>http://www.rbwestmoreland.com/posts/introducing-jenkinshud</id>
+   <content type="html">&lt;p&gt;JenkinsHUD is a team oriented UI of Jenkins job statuses.  &lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://github.com/rbwestmoreland/JenkinsHUD&quot;&gt;https://github.com/rbwestmoreland/JenkinsHUD&lt;/a&gt;&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Response Time Header IHttpModule</title>
+   <link href="http://www.rbwestmoreland.com/posts/response-time-header-ihttpmodule"/>
+   <updated>2012-03-04T00:00:00-05:00</updated>
+   <id>http://www.rbwestmoreland.com/posts/response-time-header-ihttpmodule</id>
+   <content type="html">&lt;script src=&quot;https://gist.github.com/1976451.js&quot;&gt; &lt;/script&gt;
+</content>
+ </entry>
+ 
+ 
+</feed>
