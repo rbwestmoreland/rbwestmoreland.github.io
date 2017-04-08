@@ -11,6 +11,9 @@ rmdir /S /Q _site
 REM build jekyll site
 call jekyll build
 
+REM adding .nojekyll file
+type null > _site/.nojekyll
+
 REM go back to '_scripts' directory
 cd _scripts
 
