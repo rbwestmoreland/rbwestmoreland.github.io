@@ -1,3 +1,4 @@
 url: "https://www.rbwestmoreland.com"
 title: "Bates Westmoreland"
 permalink: /posts/:title
+include: [".well-known"]
