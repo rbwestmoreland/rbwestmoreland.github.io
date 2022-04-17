@@ -6,45 +6,79 @@ I hereby claim:
 
   * I am an admin of http://rbwestmoreland.com
   * I am rbwestmoreland (https://keybase.io/rbwestmoreland) on keybase.
-  * I have a public key ASCNc7VMbRhst4ipOUUDlCbBwwwNPC2426x6cq_SFtk4Uwo
+  * I have a public key with fingerprint FCFB 5ED2 1580 C164 1ED7  0F2E 0033 8C45 BE0B D9AF
 
 To do so, I am signing this object:
 
 {
-    "body": {
-        "key": {
-            "eldest_kid": "01208d73b54c6d186cb788a93945039426c1c30c0d3c2db8dbac7a72afd216d938530a",
-            "host": "keybase.io",
-            "kid": "01208d73b54c6d186cb788a93945039426c1c30c0d3c2db8dbac7a72afd216d938530a",
-            "uid": "c9a1fa80237bcee7c3f49d4c5deeb219",
-            "username": "rbwestmoreland"
-        },
-        "service": {
-            "hostname": "rbwestmoreland.com",
-            "protocol": "http:"
-        },
-        "type": "web_service_binding",
-        "version": 1
+  "body": {
+    "key": {
+      "eldest_kid": "01208d73b54c6d186cb788a93945039426c1c30c0d3c2db8dbac7a72afd216d938530a",
+      "fingerprint": "fcfb5ed21580c1641ed70f2e00338c45be0bd9af",
+      "host": "keybase.io",
+      "key_id": "00338c45be0bd9af",
+      "kid": "0101e1c8619f5126407df04ba96221f246a21aa4727a753e7ae7ee24de3dfa9ec9370a",
+      "uid": "c9a1fa80237bcee7c3f49d4c5deeb219",
+      "username": "rbwestmoreland"
     },
-    "client": {
-        "name": "keybase.io go client",
-        "version": "1.0.20"
-    },
-    "ctime": 1491669673,
-    "expire_in": 504576000,
     "merkle_root": {
-        "ctime": 1491669565,
-        "hash": "7d40f59799704fa1170c330a05b9c176106c2b270728deffe62d96fed6bbe034397899591e82aa4a6765b78ea7fb4473c8e0ce48e9008e10c0acb758cbeb2478",
-        "seqno": 1006837
+      "ctime": 1650154292,
+      "hash_meta": "9a73ef0e4a25a27ba1edcc98b0fdcb96a152ae58883761fe3aa32e2ba5e98243",
+      "seqno": 22308636
     },
-    "prev": "46d9f58f14ab2a85563a89843e92da4dc6ffc62a45722d74fecbf83b786fd403",
-    "seqno": 14,
-    "tag": "signature"
+    "revoke": {
+      "sig_ids": [
+        "97d5e58ecad52251fa7292d9e99ae7940f5a3f7dc0bc8f71e405aeaf435fd4ab0f"
+      ]
+    },
+    "service": {
+      "hostname": "rbwestmoreland.com",
+      "protocol": "http:"
+    },
+    "type": "web_service_binding",
+    "version": 1
+  },
+  "ctime": 1650154295,
+  "expire_in": 157680000,
+  "prev": "387a638df3953072ff114a791680c873857d22b619b2286cd427ccb314b81831",
+  "seqno": 20,
+  "tag": "signature"
 }
 
 which yields the signature:
 
-hKRib2R5hqhkZXRhY2hlZMOpaGFzaF90eXBlCqNrZXnEIwEgjXO1TG0YbLeIqTlFA5QmwcMMDTwtuNusenKv0hbZOFMKp3BheWxvYWTFAwF7ImJvZHkiOnsia2V5Ijp7ImVsZGVzdF9raWQiOiIwMTIwOGQ3M2I1NGM2ZDE4NmNiNzg4YTkzOTQ1MDM5NDI2YzFjMzBjMGQzYzJkYjhkYmFjN2E3MmFmZDIxNmQ5Mzg1MzBhIiwiaG9zdCI6ImtleWJhc2UuaW8iLCJraWQiOiIwMTIwOGQ3M2I1NGM2ZDE4NmNiNzg4YTkzOTQ1MDM5NDI2YzFjMzBjMGQzYzJkYjhkYmFjN2E3MmFmZDIxNmQ5Mzg1MzBhIiwidWlkIjoiYzlhMWZhODAyMzdiY2VlN2MzZjQ5ZDRjNWRlZWIyMTkiLCJ1c2VybmFtZSI6InJid2VzdG1vcmVsYW5kIn0sInNlcnZpY2UiOnsiaG9zdG5hbWUiOiJyYndlc3Rtb3JlbGFuZC5jb20iLCJwcm90b2NvbCI6Imh0dHA6In0sInR5cGUiOiJ3ZWJfc2VydmljZV9iaW5kaW5nIiwidmVyc2lvbiI6MX0sImNsaWVudCI6eyJuYW1lIjoia2V5YmFzZS5pbyBnbyBjbGllbnQiLCJ2ZXJzaW9uIjoiMS4wLjIwIn0sImN0aW1lIjoxNDkxNjY5NjczLCJleHBpcmVfaW4iOjUwNDU3NjAwMCwibWVya2xlX3Jvb3QiOnsiY3RpbWUiOjE0OTE2Njk1NjUsImhhc2giOiI3ZDQwZjU5Nzk5NzA0ZmExMTcwYzMzMGEwNWI5YzE3NjEwNmMyYjI3MDcyOGRlZmZlNjJkOTZmZWQ2YmJlMDM0Mzk3ODk5NTkxZTgyYWE0YTY3NjViNzhlYTdmYjQ0NzNjOGUwY2U0OGU5MDA4ZTEwYzBhY2I3NThjYmViMjQ3OCIsInNlcW5vIjoxMDA2ODM3fSwicHJldiI6IjQ2ZDlmNThmMTRhYjJhODU1NjNhODk4NDNlOTJkYTRkYzZmZmM2MmE0NTcyMmQ3NGZlY2JmODNiNzg2ZmQ0MDMiLCJzZXFubyI6MTQsInRhZyI6InNpZ25hdHVyZSJ9o3NpZ8RAwVF8dpeEuvT0RMqfTbrGViLROpBAqUTWPATjKogyIunnaX7mHCJtJJg5K/ZY34WZXqEyPD0LaK95ef6otIrRAqhzaWdfdHlwZSCkaGFzaIKkdHlwZQildmFsdWXEIBGrzQ7QR8CuOVj/BfSyoR53urWPmXotK2F6WrH9VzaTo3RhZ80CAqd2ZXJzaW9uAQ==
+-----BEGIN PGP MESSAGE-----
+Version: Keybase OpenPGP v2.1.13
+Comment: https://keybase.io/crypto
+
+yMQDAnicbZN7bBRVFMa3pS20UCqIRQQTGZpGwtLM3Dszd2YhoG5QgQKiYBMrrvc1
+y9B2t8zOlj5YRAFpAHlUTaFQKAEqb6ISVIKk1LYQwBKISgBdxaKCNBoRmsrTu1US
+o84fM7kz3/nOd39zbktmL09GkgeumHC477l9SSea34h6SGEhqpJImFVIviqpiPc8
+eDHjETdQZDPJJ8kKkA2GINFUqjPF0ClBhoFNaKqaLG5ApwqFMpUZpIARgxFMEUYA
+WwwoOjOhoUEZS17JskNB7pQ6dsgVtha1iMaFRDNkquiqwhmSLcBlGUKDqhrhMmEm
+tkTh7HAkUSHCERzheXZYvBOLwF/x/qu/n1tWuEINXTEtTQG6KiNmySrBpg6AYgFV
+x0DBWEVApNUgR5gjzoHKOGQWNjk1IerJHe2xoyZWLGzIACJCOUcUWqrJVKoxzglQ
+zIQwwp0QLuFC7ZB5gmBJ2OHFOMSkmFcq4U5RMQ844bCbQExdOyFUdE1WNBWYQGwT
+R2YHSriLRb2JEeSWzFUMNAwQwQIPpaZBZItRYupY0QDmmmEYEOmKxSHGEHBAsMZN
+A6hQpInwuaGw5AMAyoYOdRHB4WXhIp7oHrGDgl5E8hVKJmKaMOIUMw0ATewRiTTM
+5KYpgJiqbGkYWohRmVDDQgpXZQ1zbKlQs5iKRSBpVizRzSmzaY954nf9L4Y8Gi4R
+wUqdsBum4WLxfbbrlvoSdNyK0oR+HieBv50CxA4xMTGioIw7ETscErSE8t/gNK/E
+y0tthwfshEJDuiGLK9GGlwlLaCCsQ4NZ0BRziIBlKYqKkakIHTWQmE7EACBiSggA
+YriZChClBCoqMRQDKv8gKUxdHBSeAl8Iu1GHS7HmIy+neJIyPGmpyYmj5MlIf+D+
+AUv2Zd2bXLFz4AfzZ8b3jvOvGNaaFV9Y0NzWGLtbY96D/ZSrNn98xNKy3m3RSetz
+s281zemcPuCbq61LG555ryvesapzY9qSGHqyMe+Vgv6nem368oUL3sjDl8nYoq05
+aU8f6arKbPUMiA2af+P5jQuuXb3dmLR6ZHr72d4PDTqCxlxK2x7qWF0+sXPqqzdz
+fgjs66xv21z14qq8muFTN6fkpy/s1X4x6DlWm7L2ubmPnlk0q/JyfMVXy8ulPqMu
+1vzU+fb+kgeT/StRdU7+7lHf57bV9c1/f59/Xnnqys+jtR/fHNacMa56nX/XnT5V
+ByY9Gz3qPrGpawIJ/HjB3rA3Oqb7UH2hbd5d4HpTcifmXjO/HZCW+uHtvtnvtPuG
+TD50lLjLduxpXx7s9wf2b7ke3vNUNHWob9jQc9sfG3nwzoWCk1s3eefu3NAyZEvT
+qtO/Z3dcvvL1zzHL271+72drFg9uqB7eUvnpa+l1o+Pjf91dcXbwW9Ud09ZHuj/Z
+9dGbr+dmLb1UXrtI9SeXd323pDh48/C2ddvW5HXkrM0eOP30+crudn4wpTE/qfBA
+fPSY5JcuHj8mTfllVCzpRu6MGb/dSlZPXq+fMuvUI1d2zGza31AbGut3yzbXNZ8c
+eq/hlh06Yd2ouLPs0prDNWf2vBt0BlozmrT0L0b0j3dNq88smFN3fHHL5N373WvN
+meOXa5HWtvM1kyqrsmpWnvgTrQgHAg==
+=pvdv
+-----END PGP MESSAGE-----
 
 And finally, I am proving ownership of this host by posting or
 appending to this document.
