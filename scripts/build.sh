@@ -9,3 +9,4 @@ NODE_ENV=production bundle
 
 # build
 jekyll build
+touch _site/.nojekyll
